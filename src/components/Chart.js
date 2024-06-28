@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import d3Tip from "d3-tip";
-import { data } from "../data";
+import { data } from "././data";
 import { calculateViewBox } from "../helpers/viewBoxHelper";
 
 const Chart = ({ onSquareClick, viewBox, setViewBox }) => {
