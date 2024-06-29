@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Chart from "./components/Chart";
 import Modal from "./components/Modal";
 import FormModal from "./components/FormModal";
-import logo from './logo.svg';
 import './App.css';
 
 const App = () => {
@@ -63,7 +62,6 @@ const App = () => {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
@@ -99,4 +97,3 @@ const App = () => {
 };
 
 export default App;
-a
