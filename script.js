@@ -74,9 +74,35 @@ function showSquareModal(square) {
   labelInput.value = square.title;
 
   saveButton.onclick = function () {
-    square.title = labelInput.value;
-    closeModal();
-    initializeVisualization(data); // Re-render the visualization
+    const updatedSquareData = {
+      ...square,
+      title: labelInput.value // Update the title
+    };
+
+    // Call the update API
+    fetch(`/squares/${square.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatedSquareData)
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+        closeModal();
+
+        // Re-fetch data and re-initialize visualization
+        fetch('/squares')
+          .then(response => response.json())
+          .then(data => {
+            svg.selectAll("*").remove(); // Clear previous svg
+            initializeVisualization(data);
+          });
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
   };
 
   document.getElementById("cancel").onclick = function () {
@@ -84,7 +110,6 @@ function showSquareModal(square) {
   };
 }
 
-// Close Modal
 function closeModal() {
   document.getElementById("myModal").style.display = "none";
 }
@@ -127,7 +152,7 @@ document.getElementById('view-scale').onclick = function () {
 document.getElementById('include').onclick = function () {
   const square = currentSquare;
   square.included = !square.included;
-  initializeVisualization(data); // Re-render the visualization
+  initializeVisualization(squareData); // Re-render the visualization
 };
 
 // Save Data
@@ -158,6 +183,7 @@ window.addEventListener("load", loadData);
 
 // Initialize visualization on page load
 window.addEventListener("load", function () {
+  loadData();
   initializeVisualization(squareData);
 });
 
@@ -321,6 +347,35 @@ window.onclick = function (event) {
 btnSaveLabel.onclick = function () {
   if (currentTextElement) {
     currentTextElement.textContent = labelInput.value;
+
+    // Update square data on server
+    const updatedSquareData = {
+      id: currentTextElement.id,
+      title: labelInput.value
+    };
+
+    fetch(`/squares/${updatedSquareData.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatedSquareData)
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+        closeModal();
+        // Re-fetch data and re-initialize visualization
+        fetch('/squares')
+          .then(response => response.json())
+          .then(data => {
+            svg.selectAll("*").remove(); // Clear previous svg
+            initializeVisualization(data);
+          });
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
   }
   modal.style.display = "none";
 };
@@ -339,7 +394,7 @@ btnViewScale.onclick = function () {
 
 btnViewScope.onclick = function () {
   const selectedClass = prompt("Enter class to filter (e.g., leaf, fruit):");
-  const filteredData = filterSquares(data, selectedClass);
+  const filteredData = filterSquares(squareData, selectedClass);
   svg.selectAll("*").remove(); // Clear previous svg
   initializeVisualization(filteredData);
 };
@@ -391,7 +446,7 @@ document.addEventListener('DOMContentLoaded', function () {
         class: 'fruit',
         parent: 'leaf',
         depth: 2,
-        title: labelValue, // Assuming you want to save the input as the title
+        title: labelValue // Assuming you want to save the input as the title
       };
       console.log("Saving data:", squareData);
       // Call saveSquareData to actually save the data
@@ -436,13 +491,13 @@ adjustFruitOpacityOnLeafHover();
 // Load and initialize visualization
 window.addEventListener("load", function () {
   loadData();
-  initializeVisualization(data);
+  initializeVisualization(squareData);
 });
 
 // Save the current state of the data
 function saveData() {
-  if (data) {
-    localStorage.setItem("squareData", JSON.stringify(data));
+  if (squareData) {
+    localStorage.setItem("squareData", JSON.stringify(squareData));
   } else {
     console.error("No data to save");
   }
@@ -464,3 +519,4 @@ function loadData() {
     window.squareData = {};
   }
 }
+ 
