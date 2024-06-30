@@ -1,14 +1,22 @@
 {
   "name": "square-data-management-app",
   "version": "1.0.0",
+  "engines": {
+    "node": "20.x"
+  },
   "description": "A React application for managing square data visualizations",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^12.1.5",
+    "@testing-library/react": "^13.0.5",
     "@testing-library/user-event": "^13.5.0",
     "d3": "^7.9.0",
     "d3-tip": "^0.9.1",
+    "mysql": "^2.18.1",
+    "express": "^4.17.1",
+    "cors": "^2.8.5",
+    "body-parser": "^1.19.0",
+    "dotenv": "^10.0.0",
     "npx": "^3.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
@@ -16,7 +24,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "node server.js",
     "build": "react-scripts build",
     "download-deps": "npm install d3 d3-tip",
     "test": "react-scripts test",
