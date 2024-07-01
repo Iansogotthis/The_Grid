@@ -4,31 +4,31 @@
   "engines": {
     "node": "20.x"
   },
-  "description": "A React application for managing square data visualizations",
+  "description": "A Node.js application for managing square data visualizations",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^6.4.6",
-    "@testing-library/react": "^16.0.0",
-    "@testing-library/user-event": "^14.5.2",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.4.3",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "d3": "^7.9.0",
     "d3-tip": "^0.9.1",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
     "mysql": "^2.18.1",
     "npm": "^10.8.1",
-    "npx": "^3.0.0",
+    "npx": "^10.2.2",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react-dom": "^18.2.0",
     "react-scripts": "^5.0.1",
+    "testing-library": "^0.0.2",
     "web-vitals": "^4.2.1"
   },
   "scripts": {
     "start": "node server.js",
     "start:frontend": "react-scripts start",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
-    "download-deps": "yarn add d3 d3-tip",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -50,9 +50,9 @@
       "last 1 safari version"
     ]
   },
-  "main": "index.js",
+  "main": "server.js",
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "yarn@4.3.1"
+  "packageManager": "npm@9.8.1"
 }
