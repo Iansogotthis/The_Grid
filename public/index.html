@@ -77,18 +77,14 @@
         const labelInput = document.getElementById("label-input");
 
         // Variables for current modal state
-        let currentUrl = "";
-        let currentTextElement = null;
-        let currentSquareClass = "";
+        let currentSquare = null;
 
         // Function to open the modal
-        function openModal(url, className, textElement) {
+        function openModal(square) {
           modal.style.display = "flex";
-          currentUrl = url;
-          currentTextElement = textElement;
-          currentSquareClass = className;
-          labelInput.value = textElement.textContent;
-          modalText.textContent = `Square ${className} clicked! Edit Label:`;
+          currentSquare = square;
+          labelInput.value = square.title;
+          modalText.textContent = `Square ${square.class} clicked! Edit Label:`;
         }
 
         // Event listener to close modal when the close button is clicked
@@ -98,12 +94,34 @@
         window.onclick = function (event) { if (event.target === modal) modal.style.display = "none"; };
 
         // Event listener to save the label when save button is clicked
-        btnSaveLabel.onclick = function () { if (currentTextElement) currentTextElement.textContent = labelInput.value; modal.style.display = "none"; };
+        btnSaveLabel.onclick = async function () {
+          if (currentSquare) {
+            currentSquare.title = labelInput.value;
+            try {
+              const response = await fetch(`/squares/${currentSquare.id}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title: currentSquare.title })
+              });
+              if (!response.ok) {
+                throw new Error('Failed to save data');
+              }
+              const data = await response.json();
+              console.log('Data saved:', data);
+              modal.style.display = 'none';
+              loadData(); // Reload data to refresh the visualization
+            } catch (error) {
+              console.error('Error:', error);
+            }
+          }
+        };
 
         // Event listeners for modal action buttons
         btnViewScale.onclick = function () { window.location.href = "scaled_view.html"; };
         btnViewScope.onclick = function () { window.location.href = "scoped_view.html"; };
-        btnInclude.onclick = function () { window.location.href = `included_build.html?class=${currentSquareClass}&parent=${currentTextElement.textContent}`; };
+        btnInclude.onclick = function () { window.location.href = `included_build.html?class=${currentSquare.class}&parent=${currentSquare.parent}`; };
         btnCancel.onclick = function () { modal.style.display = "none"; };
 
         // Debounce function to prevent frequent clicks
@@ -116,18 +134,16 @@
         }
 
         // Function to draw a square and add click event listener
-        function drawSquare(x, y, size, color, className, depth, parentText) {
+        function drawSquare(x, y, size, color, square, depth) {
           const rect = svg.append("rect")
             .attr("x", x - size / 2)
             .attr("y", y - size / 2)
             .attr("width", size)
             .attr("height", size)
-            .attr("class", `square ${className}`)
+            .attr("class", `square ${square.class}`)
             .attr("fill", color)
             .on("click", debounce(function () {
-              const url = `pages/scoped_page_${parentText}_${depth}_${className}.html`;
-              const textElement = d3.select(this.nextSibling);
-              openModal(url, className, textElement.node());
+              openModal(square);
             }, 200));
 
           const text = svg.append("text")
@@ -137,52 +153,48 @@
             .attr("text-anchor", "middle")
             .attr("font-size", size / 5)
             .attr("pointer-events", "none")
-            .text(className);
+            .text(square.title);
         }
 
-        // Draw the root square at the center
-        drawSquare(centerX, centerY, centerSquareSize, "lightblue", "root", 1, "Center");
-
-        // Define coordinates for small squares around the root
-        const corners = [
-          [centerX - centerSquareSize / 2, centerY - centerSquareSize / 2],
-          [centerX + centerSquareSize / 2, centerY - centerSquareSize / 2],
-          [centerX - centerSquareSize / 2, centerY + centerSquareSize / 2],
-          [centerX + centerSquareSize / 2, centerY + centerSquareSize / 2],
-        ];
-
-        // Recursive function to draw squares in a hierarchy
-        function drawSquares(corners, size, depth, className, parentText) {
+        // Function to recursively draw squares in a hierarchy
+        function drawSquares(square, x, y, size, depth) {
           if (depth > 3) return; // Limit the depth for better performance
 
           const colors = { root: "lightblue", branch: "lightgray", leaf: "lightgreen", fruit: "lightcoral" };
+          drawSquare(x, y, size, colors[square.class] || 'lightgray', square, depth);
 
-          corners.forEach(([x, y], index) => {
-            let currentClassName;
-            if (depth === 1) currentClassName = "branch";
-            else if (depth === 2) currentClassName = "leaf";
-            else if (depth === 3) currentClassName = "fruit";
-
-            drawSquare(x, y, size, colors[currentClassName] || "", currentClassName || "", depth, parentText);
-
-            if (size > tinySquareSize) {
-              const nextSize = size / 2;
-              const nextCorners = [
-                [x - size / 2, y - size / 2],
-                [x + size / 2, y - size / 2],
-                [x - size / 2, y + size / 2],
-                [x + size / 2, y + size / 2],
-              ];
-
-              requestAnimationFrame(() => {
-                drawSquares(nextCorners, nextSize, depth + 1, currentClassName || "", `${parentText}_${index + 1}`);
-              });
-            }
+          const nextSize = size / 2;
+          const nextDepth = depth + 1;
+          square.children?.forEach((child, index) => {
+            const angle = (index / square.children.length) * 2 * Math.PI;
+            const nextX = x + Math.cos(angle) * size;
+            const nextY = y + Math.sin(angle) * size;
+            drawSquares(child, nextX, nextY, nextSize, nextDepth);
           });
         }
 
-        // Start the recursive drawing
-        drawSquares(corners, smallSquareSize, 1, "root", "Root");
+        // Function to load data from the server
+        async function loadData() {
+          try {
+            const response = await fetch('/squares');
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            if (!data || data.length === 0) {
+              console.error("No data received from the server.");
+              return;
+            }
+            const squareData = data[0]; // Assuming the first object is the root square
+            console.log("Data loaded:", squareData);
+            svg.selectAll("*").remove(); // Clear previous visualization
+            drawSquares(squareData, centerX, centerY, centerSquareSize, 1); // Draw new visualization
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        }
+
+        window.addEventListener("load", loadData);
 
         // Function to adjust fruit opacity when a leaf is hovered
         function adjustFruitOpacityOnLeafHover() {
@@ -203,54 +215,6 @@
             });
           });
         }
-
-        // Function to load data from the server
-        async function loadData() {
-          try {
-            const response = await fetch('https://squar-bd2bb2372583.herokuapp.com/squares');
-            if (!response.ok) {
-              throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-
-            if (!data || data.length === 0) {
-              console.error("No data received from the server.");
-              return;
-            }
-
-            const squareData = data[0]; // Assuming the first object is the root square
-            console.log("Data loaded:", squareData);
-
-            initializeVisualization(squareData); // Initialize visualization with the fetched data
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
-        }
-
-        // Function to save data to the server
-        async function saveData() {
-          if (squareData) {
-            try {
-              const response = await fetch('https://squar-bd2bb2372583.herokuapp.com/squares', {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(squareData)
-              });
-              if (!response.ok) {
-                throw new Error('Network response was not ok');
-              }
-              const data = await response.json();
-              console.log('Data saved:', data);
-            } catch (error) {
-              console.error("Error saving data:", error);
-            }
-          } else {
-            console.error("No data to save");
-          }
-        }
-
-        window.addEventListener("beforeunload", saveData);
-        window.addEventListener("load", loadData);
 
         // Adjust fruit opacity on leaf hover
         adjustFruitOpacityOnLeafHover();
