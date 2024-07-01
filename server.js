@@ -11,7 +11,9 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
+
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // MySQL connection
 const db = mysql.createConnection({
@@ -33,9 +35,9 @@ db.connect(err => {
 
 // Create a new square
 app.post('/squares', (req, res) => {
-  const { name, size, color, type, parent_id } = req.body;
-  const query = 'INSERT INTO squares (name, size, color, type, parent_id) VALUES (?, ?, ?, ?, ?)';
-  db.query(query, [name, size, color, type, parent_id], (err, result) => {
+  const { title, plane, purpose, delineator, notations, details, extraData, class: squareClass, parent, depth, name, size, color, type, parent_id } = req.body;
+  const query = 'INSERT INTO squares (title, plane, purpose, delineator, notations, details, extraData, class, parent, depth, name, size, color, type, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  db.query(query, [title, plane, purpose, delineator, notations, details, extraData, squareClass, parent, depth, name, size, color, type, parent_id], (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
@@ -71,73 +73,35 @@ app.get('/squares/:id', (req, res) => {
 
 // Update a square
 app.put('/squares/:id', (req, res) => {
-    const { id } = req.params;
-    const { 
-      title, 
-      plane, 
-      purpose, 
-      delineator, 
-      notations, 
-      details, 
-      extraData, 
-      class: squareClass, 
-      parent, 
-      depth, 
-      name, 
-      size, 
-      color, 
-      type, 
-      parent_id 
-    } = req.body;
-  
-    const query = `
-      UPDATE squares 
-      SET 
-        title = ?, 
-        plane = ?, 
-        purpose = ?, 
-        delineator = ?, 
-        notations = ?, 
-        details = ?, 
-        extraData = ?, 
-        class = ?, 
-        parent = ?, 
-        depth = ?, 
-        name = ?, 
-        size = ?, 
-        color = ?, 
-        type = ?, 
-        parent_id = ? 
-      WHERE id = ?
-    `;
-  
-    const params = [
-      title, 
-      plane, 
-      purpose, 
-      delineator, 
-      notations, 
-      details, 
-      extraData, 
-      squareClass, 
-      parent, 
-      depth, 
-      name, 
-      size, 
-      color, 
-      type, 
-      parent_id, 
-      id
-    ];
-  
-    db.query(query, params, (err) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      res.status(200).json({ message: 'Square updated successfully' });
-    });
+  const { id } = req.params;
+  const { title, plane, purpose, delineator, notations, details, extraData, class: squareClass, parent, depth, name, size, color, type, parent_id } = req.body;
+  const query = `
+    UPDATE squares 
+    SET 
+      title = ?, 
+      plane = ?, 
+      purpose = ?, 
+      delineator = ?, 
+      notations = ?, 
+      details = ?, 
+      extraData = ?, 
+      class = ?, 
+      parent = ?, 
+      depth = ?, 
+      name = ?, 
+      size = ?, 
+      color = ?, 
+      type = ?, 
+      parent_id = ? 
+    WHERE id = ?
+  `;
+  db.query(query, [title, plane, purpose, delineator, notations, details, extraData, squareClass, parent, depth, name, size, color, type, parent_id, id], (err) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.status(200).json({ message: 'Square updated successfully' });
   });
-  
+});
 
 // Delete a square
 app.delete('/squares/:id', (req, res) => {
