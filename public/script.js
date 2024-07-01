@@ -7,10 +7,7 @@
     .append("svg")
     .attr("width", "100%")
     .attr("height", 500)
-    .attr(
-      "viewBox",
-      `0 0 ${window.innerWidth * 0.9} ${window.innerHeight * 0.9}`
-    )
+    .attr("viewBox", `0 0 ${window.innerWidth * 0.9} ${window.innerHeight * 0.9}`)
     .attr("preserveAspectRatio", "xMidYMid meet");
 
   const modal = document.getElementById("myModal");
@@ -108,10 +105,7 @@
     if (square.children) {
       const childSize = size / 2;
       const childSpacing = size / 3;
-      let childX =
-        x +
-        size / 2 -
-        (square.children.length * (childSize + childSpacing)) / 2;
+      let childX = x + size / 2 - (square.children.length * (childSize + childSpacing)) / 2;
       let childY = y + size + childSpacing;
 
       for (const child of square.children) {
@@ -137,8 +131,7 @@
 
     const centerX = window.innerWidth * 0.45;
     const centerY = window.innerHeight * 0.45;
-    const centerSquareSize =
-      Math.min(window.innerWidth, window.innerHeight) / 2;
+    const centerSquareSize = Math.min(window.innerWidth, window.innerHeight) / 2;
     drawSquare(
       svg,
       data,
@@ -157,31 +150,26 @@
     modalText.textContent = `Edit Square: ${square.title}`;
   }
 
-  btnSaveLabel.onclick = () => {
+  btnSaveLabel.onclick = async () => {
     if (currentSquare) {
       currentSquare.title = labelInput.value;
-      fetch(`/squares/${currentSquare.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(currentSquare)
-      })
-        .then((response) => {
-          if (!response.ok) throw new Error("Network response was not ok");
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Success:", data);
-          closeModal();
-          fetch("/squares")
-            .then((response) => response.json())
-            .then((data) => {
-              svg.selectAll("*").remove(); // Clear previous svg
-              initializeVisualization(data);
-            });
-        })
-        .catch((error) => {
-          console.error("Error:", error);
+      try {
+        const response = await fetch(`/squares/${currentSquare.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(currentSquare)
         });
+        if (!response.ok) throw new Error("Network response was not ok");
+        const data = await response.json();
+        console.log("Success:", data);
+        closeModal();
+        const fetchResponse = await fetch("/squares");
+        const fetchData = await fetchResponse.json();
+        svg.selectAll("*").remove(); // Clear previous svg
+        initializeVisualization(fetchData);
+      } catch (error) {
+        console.error("Error:", error);
+      }
     }
     modal.style.display = "none";
   };
@@ -213,6 +201,29 @@
   };
 
   // Load and Save Data
+  async function loadData() {
+    try {
+      const response = await fetch('https://squar-bd2bb2372583.herokuapp.com/squares');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+
+      if (!data || data.length === 0) {
+        console.error("No data received from the server.");
+        return;
+      }
+
+      squareData = data[0]; // Assuming the first object is the root square
+      console.log("Data loaded:", squareData);
+
+      initializeVisualization(squareData); // Initialize visualization with the fetched data
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      squareData = {}; // Fallback to empty data if fetch fails
+    }
+  }
+
   function saveData() {
     if (squareData) {
       localStorage.setItem("squareData", JSON.stringify(squareData));
@@ -222,35 +233,9 @@
   }
 
   window.addEventListener("beforeunload", saveData);
+  window.addEventListener("load", loadData);
 
-  function loadData() {
-    // Fetch data from the server instead of localStorage
-    fetch("/squares")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (!data || data.length === 0) {
-          console.error("No data received from the server.");
-          return;
-        }
-        squareData = data[0]; // Assuming the first object is the root square
-        console.log("Data loaded:", squareData);
-        initializeVisualization(squareData); // Initialize visualization with the fetched data
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        squareData = {}; // Fallback to empty data if fetch fails
-      });
-  }
-
-  window.addEventListener("load", () => {
-    loadData();
-  });
-
+  // Adjust fruit opacity on leaf hover
   function adjustFruitOpacityOnLeafHover() {
     const leafSquares = document.querySelectorAll(".leaf");
     const fruitSquares = document.querySelectorAll(".fruit");
