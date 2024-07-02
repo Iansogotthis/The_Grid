@@ -2,17 +2,21 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
 const path = require('path');
+const dotenv = require('dotenv');
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // PostgreSQL configuration
 const pool = new Pool({
-  user: 'your_username',
-  host: 'localhost',
-  database: 'your_database_name',
-  password: 'your_password',
-  port: 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
 // Middleware
@@ -51,7 +55,40 @@ app.post('/squares', async (req, res) => {
   }
 });
 
-// Get data route
+// Save square data with label
+app.post('/save-square', async (req, res) => {
+  const { name, size, color, type, parent_id, class: className, title } = req.body;
+
+  try {
+    const labelQuery = await pool.query(
+      "SELECT id FROM square_labels WHERE label_name = $1",
+      [className]
+    );
+
+    const label_id = labelQuery.rows[0].id;
+
+    const result = await pool.query(
+      "INSERT INTO squares (name, size, color, type, parent_id, label_id, title) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+      [name, size, color, type, parent_id, label_id, title]
+    );
+
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all squares data route
+app.get('/squares', async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM squares");
+    res.status(200).json(result.rows);
+  } catch (err) {
+    res.status500().json({ error: err.message });
+  }
+});
+
+// Get specific square data
 app.get('/get_data', async (req, res) => {
   const { squareClass, parent, depth } = req.query;
 

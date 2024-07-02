@@ -10,9 +10,11 @@ const App = () => {
   const [label, setLabel] = useState("");
   const [currentSquare, setCurrentSquare] = useState(null);
   const [formMode, setFormMode] = useState(""); // new state for form mode
+  const [squareData, setSquareData] = useState({}); // State to manage square data
 
   const openModal = (square) => {
     setCurrentSquare(square);
+    setLabel(square.title);
     setIsModalOpen(true);
   };
 
@@ -22,8 +24,29 @@ const App = () => {
   };
 
   const saveLabel = () => {
-    // Logic to save the label
-    closeModal();
+    if (currentSquare) {
+      const updatedSquareData = {
+        ...currentSquare,
+        title: label // Update the title
+      };
+
+      fetch(`/save-square`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedSquareData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+        setCurrentSquare(updatedSquareData);
+        closeModal();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
   };
 
   const handleScaledView = () => {
@@ -39,29 +62,21 @@ const App = () => {
   const handleInclude = () => {
     setFormMode("include");
     setIsFormModalOpen(true);
-    closeModal();
   };
 
   const handleExclude = () => {
     setFormMode("exclude");
     setIsFormModalOpen(true);
-    closeModal();
   };
 
   const closeFormModal = () => {
     setIsFormModalOpen(false);
   };
 
-  const submitForm = (event) => {
-    event.preventDefault();
-    const data = event.target.data.value;
-    // Logic to handle form submission
-    closeFormModal();
-  };
-
   return (
     <div className="App">
-      <header className="App-header">        <p>
+      <header className="App-header">
+        <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
         <a
@@ -74,7 +89,7 @@ const App = () => {
         </a>
       </header>
       <h1>Square Data Management App</h1>
-      <Chart onSquareClick={openModal} />
+      <Chart onSquareClick={openModal} onDataLoad={setSquareData} />
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
@@ -88,8 +103,8 @@ const App = () => {
       <FormModal
         isOpen={isFormModalOpen}
         onClose={closeFormModal}
-        onSubmit={submitForm}
         mode={formMode}
+        squareData={squareData}
       />
     </div>
   );

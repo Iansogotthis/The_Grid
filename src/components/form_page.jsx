@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const FormPage = () => {
+const FormPage = ({ onClose, squareData }) => {
   const [formData, setFormData] = useState({
     title: '',
     plane: '',
@@ -40,7 +40,8 @@ const FormPage = () => {
       .then(response => response.json())
       .then(data => {
         console.log('Success:', data);
-        window.location.href = 'included_build.html'; // Redirect or update the state as needed
+        onClose(); // Close the modal after saving
+        // Optionally update squareData state if necessary
       })
       .catch(error => {
         console.error('Error:', error);
