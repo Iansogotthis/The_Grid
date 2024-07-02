@@ -20,7 +20,7 @@
   const btnCancel = document.getElementById("cancel");
   const labelInput = document.getElementById("label-input");
   let currentSquare = null;
-
+  
   btnClose.onclick = () => {
     modal.style.display = "none";
   };
@@ -203,7 +203,7 @@
   // Load and Save Data
   async function loadData() {
     try {
-      const response = await fetch('https://squar-bd2bb2372583.herokuapp.com/squares');
+      const response = await fetch('cbetxkdyhwsb.us-east-1.rds.amazonaws.com');
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
