@@ -1,36 +1,38 @@
 {
   "name": "square-data-management-app",
   "version": "1.0.0",
-  "engines": {
-    "node": "20.x"
-  },
   "description": "A React application for managing square data visualizations",
   "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.0.5",
-    "@testing-library/user-event": "^13.5.0",
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "d3": "^7.9.0",
-    "d3-tip": "^0.9.1",
-    "dotenv": "^10.0.0",
-    "express": "^4.19.2",
-    "mysql": "^2.18.1",
-    "npx": "^3.0.0",
-    "path": "^0.12.7",
-    "pg": "^8.12.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-scripts": "^3.0.1",
-    "web-vitals": "^2.1.4"
+  "engines": {
+    "node": ">=20.0.0"
   },
+  "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
+    "build": "react-scripts build",
     "download-deps": "npm install d3 d3-tip",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/user-event": "latest",
+    "body-parser": "latest",
+    "core-js": "^3.37.1",
+    "cors": "latest",
+    "d3": "latest",
+    "d3-tip": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "joi": "^17.13.3",
+    "mysql": "latest",
+    "npx": "^10.2.2",
+    "pg": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "^5.0.1",
+    "web-vitals": "latest"
   },
   "eslintConfig": {
     "extends": [
@@ -50,7 +52,6 @@
       "last 1 safari version"
     ]
   },
-  "main": "index.js",
   "keywords": [],
   "author": "",
   "license": "ISC"

@@ -148,23 +148,10 @@
     const btnInclude = document.getElementById("include");
     const btnCancel = document.getElementById("cancel");
     const labelInput = document.getElementById("label-input");
-    const squareData = {
-      class: 'fruit',
-      parent: 'leaf',
-      depth: 2,
-      title: 'Apple',
-      // Add other fields as necessary
-    };
-    let currentUrl = "";
-    let currentTextElement = null;
-    let currentSquareClass = "";
 
     // Function to open the modal
     function openModal(url, className, textElement) {
       modal.style.display = "flex";
-      currentUrl = url;
-      currentTextElement = textElement;
-      currentSquareClass = className;
       labelInput.value = textElement.textContent;
       modalText.textContent = `Square ${className} clicked! Edit Label:`;
     }
@@ -183,9 +170,8 @@
 
     // When the user clicks on save label
     btnSaveLabel.onclick = function () {
-      if (currentTextElement) {
-        currentTextElement.textContent = labelInput.value;
-      }
+      // Placeholder function, adjust as per your backend integration
+      console.log("Saving label:", labelInput.value);
       modal.style.display = "none";
     };
 
@@ -199,7 +185,9 @@
     };
 
     btnInclude.onclick = function () {
-      window.location.href = `included_build.html?class=${currentSquareClass}&parent=${currentTextElement.textContent}`;
+      // Placeholder function, adjust as per your requirement
+      console.log("Including:", labelInput.value);
+      modal.style.display = "none";
     };
 
     btnCancel.onclick = function () {
@@ -319,97 +307,6 @@
 
     // Start drawing from the initial corners and size
     drawSquares(corners, smallSquareSize, 1, "root", "Root");
-
-    // Function to adjust fruit opacity on leaf hover
-    function adjustFruitOpacityOnLeafHover() {
-      const leafSquares = document.querySelectorAll('.leaf');
-      const fruitSquares = document.querySelectorAll('.fruit');
-
-      leafSquares.forEach(leaf => {
-        leaf.addEventListener('mouseover', () => {
-          fruitSquares.forEach(fruit => {
-            fruit.style.opacity = '1'; // Set fruit opacity to full on leaf hover
-          });
-        });
-
-        leaf.addEventListener('mouseout', () => {
-          fruitSquares.forEach(fruit => {
-            fruit.style.opacity = '0.3'; // Revert fruit opacity on mouse out
-          });
-        });
-      });
-    }
-    document.addEventListener('DOMContentLoaded', function() {
-      const squareForm = document.getElementById('squareForm');
-      squareForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-        
-        const name = document.getElementById('name').value;
-        const size = document.getElementById('size').value;
-        const color = document.getElementById('color').value;
-        const type = document.getElementById('type').value;
-        const parent_id = document.getElementById('parent_id').value;
-
-        const squareData = {
-          name,
-          size,
-          color,
-          type,
-          parent_id
-        };
-
-        try {
-          const response = await fetch('http://localhost:3000/squares', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(squareData)
-          });
-
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-
-          const responseData = await response.json();
-          console.log('Square data saved:', responseData);
-          
-        } catch (error) {
-          console.error('There was a problem with the fetch operation:', error);
-        }
-      });
-
-      adjustFruitOpacityOnLeafHover();
-    });
-
-    function saveSquareData(squareData) {
-      fetch('/save_data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(squareData),
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Success:', data);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
-    }
-
-    function getSquareData(squareClass, parent, depth) {
-      fetch(`/get_data?class=${encodeURIComponent(squareClass)}&parent=${encodeURIComponent(parent)}&depth=${encodeURIComponent(depth)}`)
-      .then(response => response.json())
-      .then(data => {
-        console.log('Success:', data);
-        // Process the data
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
-    }
   </script>
 </body>
 </html>
