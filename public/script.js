@@ -203,7 +203,7 @@
   // Load and Save Data
   async function loadData() {
     try {
-      const response = await fetch('mysql://hp0lzrzsnuzjl0ei:zvskixvf2bwkvhjh@e11wl4mksauxgu1w.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/bfaxn1uhv9udz7ng');
+      const response = await fetch('http://localhost:3000/squares'); // Update with correct backend endpoint
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
