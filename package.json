@@ -4,7 +4,7 @@
   "description": "A React application for managing square data visualizations",
   "private": true,
   "engines": {
-    "node": ">=20.0.0"
+    "node": "20.x"
   },
   "main": "index.js",
   "scripts": {
@@ -40,7 +40,12 @@
     "@babel/preset-env": "^7.14.7",
     "@babel/preset-react": "^7.14.5",
     "babel-jest": "^27.0.6",
-    "@babel/plugin-proposal-private-property-in-object": "^7.14.5",
+    "@babel/plugin-transform-private-methods": "^7.14.5",
+    "@babel/plugin-transform-numeric-separator": "^7.14.5",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.14.5",
+    "@babel/plugin-transform-class-properties": "^7.14.5",
+    "@babel/plugin-transform-optional-chaining": "^7.14.5",
+    "@babel/plugin-transform-private-property-in-object": "^7.14.5",
     "jest": "^27.0.6"
   },
   "babel": {
