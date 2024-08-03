@@ -32,7 +32,30 @@
     "react": "latest",
     "react-dom": "latest",
     "react-scripts": "^5.0.1",
+    "sequence": "^3.0.0",
     "web-vitals": "latest"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.6",
+    "@babel/preset-env": "^7.14.7",
+    "@babel/preset-react": "^7.14.5",
+    "babel-jest": "^27.0.6",
+    "@babel/plugin-proposal-private-property-in-object": "^7.14.5",
+    "jest": "^27.0.6"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ]
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.(js|jsx)$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/"
+    ]
   },
   "eslintConfig": {
     "extends": [

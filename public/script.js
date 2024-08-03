@@ -1,8 +1,12 @@
-const svg = d3.select("#chart").append("svg").attr("width", "100%").attr("height", 500);
+const svg = d3.select("#chart")
+  .append("svg")
+  .attr("width", "100%")
+  .attr("height", 500);
 
 let squareData = {};
 let currentSquare = null;
 
+// DOM Elements
 const modal = document.getElementById("myModal");
 const modalText = document.getElementById("modal-text");
 const btnSaveLabel = document.getElementById("save-label");
@@ -13,12 +17,50 @@ const btnCancel = document.getElementById("cancel");
 const labelInput = document.getElementById("label-input");
 const form = document.getElementById("squareForm");
 
+// Event Listeners
 window.addEventListener("load", function () {
   loadData();
   initializeVisualization(squareData);
   bindEventListeners();
 });
 
+function bindEventListeners() {
+  btnViewScope.addEventListener("click", handleViewScopeClick);
+  btnViewScale.addEventListener("click", handleViewScaleClick);
+  btnInclude.addEventListener("click", handleIncludeClick);
+  form.addEventListener("submit", handleFormSubmit);
+  btnCancel.addEventListener("click", () => closeModal());
+  adjustFruitOpacityOnLeafHover();
+}
+
+// Data Management
+function loadData() {
+  fetch('/squares')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      squareData = data;
+      saveData();
+      initializeVisualization(squareData);
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+}
+
+function saveData() {
+  if (squareData) {
+    localStorage.setItem("squareData", JSON.stringify(squareData));
+  } else {
+    console.error("No data to save");
+  }
+}
+
+// Visualization Functions
 function initializeVisualization(data) {
   svg.selectAll("*").remove();
   drawSquare(svg, data, 300, 50, 100, getColor(data.class), data.depth);
@@ -69,6 +111,7 @@ function getColor(className) {
   return colors[className] || "lightgrey";
 }
 
+// Modal Functions
 function showSquareModal(square) {
   currentSquare = square;
   modal.style.display = "block";
@@ -76,7 +119,6 @@ function showSquareModal(square) {
   labelInput.value = square.title;
 
   btnSaveLabel.onclick = () => handleSaveLabel(square);
-  btnCancel.onclick = () => closeModal();
 }
 
 function handleSaveLabel(square) {
@@ -88,14 +130,19 @@ function handleSaveLabel(square) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updatedSquareData)
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
   .then(data => {
     square.title = updatedTitle;
     closeModal();
     initializeVisualization(squareData);
   })
   .catch(error => {
-    console.error('Error:', error);
+    console.error('Error saving data:', error);
   });
 }
 
@@ -103,14 +150,7 @@ function closeModal() {
   modal.style.display = "none";
 }
 
-function bindEventListeners() {
-  btnViewScope.addEventListener("click", handleViewScopeClick);
-  btnViewScale.addEventListener("click", handleViewScaleClick);
-  btnInclude.addEventListener("click", handleIncludeClick);
-  form.addEventListener("submit", handleFormSubmit);
-  adjustFruitOpacityOnLeafHover();
-}
-
+// Form Handling
 function handleFormSubmit(event) {
   event.preventDefault();
   const newSquareData = {
@@ -131,16 +171,22 @@ function saveSquareData(squareData) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(squareData),
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
   .then(data => {
     console.log('Success:', data);
     initializeVisualization(squareData);
   })
   .catch(error => {
-    console.error('Error:', error);
+    console.error('Error saving data:', error);
   });
 }
 
+// Utility Functions
 function adjustFruitOpacityOnLeafHover() {
   const leafSquares = document.querySelectorAll('.leaf');
   const fruitSquares = document.querySelectorAll('.fruit');
@@ -172,6 +218,7 @@ function filterSquares(data, className) {
   return filterRecursive(data);
 }
 
+// Event Handlers
 function handleViewScaleClick() {
   const zoomScale = 2;
   const translateX = svg.attr("width") / 2;
@@ -189,26 +236,4 @@ function handleViewScopeClick() {
   const selectedClass = prompt("Enter class to filter (e.g., leaf, fruit):");
   const filteredData = filterSquares(squareData, selectedClass);
   initializeVisualization(filteredData);
-}
-
-function loadData() {
-  const storedData = localStorage.getItem("squareData");
-  if (storedData) {
-    try {
-      squareData = JSON.parse(storedData);
-    } catch (error) {
-      console.error("Error parsing stored data:", error);
-      squareData = {};
-    }
-  } else {
-    squareData = {};
-  }
-}
-
-function saveData() {
-  if (squareData) {
-    localStorage.setItem("squareData", JSON.stringify(squareData));
-  } else {
-    console.error("No data to save");
-  }
 }

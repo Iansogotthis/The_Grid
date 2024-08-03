@@ -170,7 +170,6 @@
 
     // When the user clicks on save label
     btnSaveLabel.onclick = function () {
-      // Placeholder function, adjust as per your backend integration
       console.log("Saving label:", labelInput.value);
       modal.style.display = "none";
     };
@@ -185,7 +184,6 @@
     };
 
     btnInclude.onclick = function () {
-      // Placeholder function, adjust as per your requirement
       console.log("Including:", labelInput.value);
       modal.style.display = "none";
     };
@@ -307,6 +305,37 @@
 
     // Start drawing from the initial corners and size
     drawSquares(corners, smallSquareSize, 1, "root", "Root");
+
+    // Function to handle form submission
+    document.getElementById("squareForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const data = {
+        name: formData.get("name"),
+        size: formData.get("size"),
+        color: formData.get("color"),
+        type: formData.get("type"),
+        parent_id: formData.get("parent_id")
+      };
+
+      fetch('/save_data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(result => {
+        console.log('Success:', result);
+        // Update the UI here if needed
+        drawSquare(centerX, centerY, data.size, data.color, data.type, 1, data.name);
+        modal.style.display = "none";
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
   </script>
 </body>
 </html>
