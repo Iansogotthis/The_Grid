@@ -1,4 +1,3 @@
-// backend/server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
@@ -85,7 +84,7 @@ app.get('/squares', async (req, res) => {
     const result = await pool.query("SELECT * FROM squares");
     res.status(200).json(result.rows);
   } catch (err) {
-    res.status500().json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -118,18 +117,18 @@ app.get('/get_data', async (req, res) => {
 
 // Save data endpoint (new endpoint)
 app.post('/save_data', (req, res) => {
-  const squareData = req.body;
+  const { name, size, color, type, parent_id } = req.body;
 
-  // Assuming you want to insert data into the squares table
-  const query = 'INSERT INTO squares (name, size, color, type, parent_id) VALUES ($1, $2, $3, $4, $5)';
-  const { name, size, color, type, parent_id } = squareData;
+  // Insert data into the squares table
+  const query = 'INSERT INTO squares (name, size, color, type, parent_id) VALUES ($1, $2, $3, $4, $5) RETURNING *';
+  const values = [name, size, color, type, parent_id];
 
-  pool.query(query, [name, size, color, type, parent_id], (err) => {
+  pool.query(query, values, (err, result) => {
     if (err) {
       console.error('Error saving data to PostgreSQL:', err);
       return res.status(500).json({ error: err.message });
     }
-    res.status(201).json({ message: 'Data saved successfully' });
+    res.status(201).json(result.rows[0]);
   });
 });
 
