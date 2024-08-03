@@ -203,7 +203,7 @@
   // Load and Save Data
   async function loadData() {
     try {
-      const response = await fetch('cbetxkdyhwsb.us-east-1.rds.amazonaws.com');
+      const response = await fetch('/correct-url'); // Update with correct URL
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
