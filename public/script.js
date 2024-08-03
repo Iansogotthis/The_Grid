@@ -203,7 +203,7 @@
   // Load and Save Data
   async function loadData() {
     try {
-      const response = await fetch('/correct-url'); // Update with correct URL
+      const response = await fetch('mysql://hp0lzrzsnuzjl0ei:zvskixvf2bwkvhjh@e11wl4mksauxgu1w.cbetxkdyhwsb.us-east-1.rds.amazonaws.com:3306/bfaxn1uhv9udz7ng');
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
