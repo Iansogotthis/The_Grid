@@ -1,7 +1,7 @@
-// Import required packages
+// server.js
 const express = require("express");
 const bodyParser = require("body-parser");
-const mariadb = require("mariadb");
+const mysql = require("mysql");
 const cors = require("cors");
 const path = require("path");
 require("dotenv").config(); // Load environment variables from .env file
@@ -17,13 +17,13 @@ app.use(bodyParser.json()); // Parse incoming request bodies in JSON format
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, "public")));
 
-// Setup MariaDB connection pool
-const pool = mariadb.createPool({
-  host: process.env.DB_HOST, // Database host
-  user: process.env.DB_USER, // Database user
-  password: process.env.DB_PASSWORD, // Database password
-  database: process.env.DB_NAME, // Database name
-  port: process.env.DB_PORT, // Database port
+// Setup MySQL connection pool
+const pool = mysql.createPool({
+  host: 'e11wl4mksauxgu1w.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
+  user: 'hp0lzrzsnuzjl0ei',
+  password: 'zvskixvf2bwkvhjh',
+  database: 'bfaxn1uhv9udz7ng',
+  port: 3306,
   connectionLimit: 5 // Maximum number of connections in the pool
 });
 
@@ -54,29 +54,39 @@ app.post("/squares", async (req, res) => {
   const query = `INSERT INTO squares (title, plane, purpose, delineator, notations, details, extraData, class, parent, depth, name, size, color, type, parent_id)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
   try {
-    const conn = await pool.getConnection(); // Get a connection from the pool
-    const result = await conn.query(query, [
-      title,
-      plane,
-      purpose,
-      delineator,
-      notations,
-      details,
-      extraData,
-      squareClass,
-      parent,
-      depth,
-      name,
-      size,
-      color,
-      type,
-      parent_id
-    ]);
-    conn.release(); // Release the connection back to the pool
-    res.status(201).json({ id: result.insertId }); // Respond with the ID of the created square
+    pool.getConnection((err, conn) => {
+      if (err) {
+        console.error('Error getting connection:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      conn.query(query, [
+        title,
+        plane,
+        purpose,
+        delineator,
+        notations,
+        details,
+        extraData,
+        squareClass,
+        parent,
+        depth,
+        name,
+        size,
+        color,
+        type,
+        parent_id
+      ], (error, results) => {
+        conn.release();
+        if (error) {
+          console.error('Error creating square:', error);
+          return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(201).json({ id: results.insertId });
+      });
+    });
   } catch (err) {
-    console.error('Error creating square:', err); // Log the error for debugging purposes
-    res.status(500).json({ error: 'Internal Server Error' }); // Handle errors and respond with a 500 status
+    console.error('Error creating square:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -87,13 +97,23 @@ app.post("/squares", async (req, res) => {
 app.get("/squares", async (req, res) => {
   const query = "SELECT * FROM squares";
   try {
-    const conn = await pool.getConnection(); // Get a connection from the pool
-    const results = await conn.query(query); // Execute the query to retrieve all squares
-    conn.release(); // Release the connection back to the pool
-    res.status(200).json(results); // Respond with the retrieved squares
+    pool.getConnection((err, conn) => {
+      if (err) {
+        console.error('Error getting connection:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      conn.query(query, (error, results) => {
+        conn.release();
+        if (error) {
+          console.error('Error fetching squares:', error);
+          return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json(results);
+      });
+    });
   } catch (err) {
-    console.error('Error fetching squares:', err); // Log the error for debugging purposes
-    res.status(500).json({ error: 'Internal Server Error' }); // Handle errors and respond with a 500 status
+    console.error('Error fetching squares:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -105,16 +125,26 @@ app.get("/squares/:id", async (req, res) => {
   const { id } = req.params;
   const query = "SELECT * FROM squares WHERE id = ?";
   try {
-    const conn = await pool.getConnection(); // Get a connection from the pool
-    const results = await conn.query(query, [id]); // Execute the query to retrieve the square by ID
-    conn.release(); // Release the connection back to the pool
-    if (results.length === 0) {
-      return res.status(404).json({ error: "Square not found" }); // Respond with a 404 status if the square is not found
-    }
-    res.status(200).json(results[0]); // Respond with the retrieved square
+    pool.getConnection((err, conn) => {
+      if (err) {
+        console.error('Error getting connection:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      conn.query(query, [id], (error, results) => {
+        conn.release();
+        if (error) {
+          console.error('Error fetching square by ID:', error);
+          return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        if (results.length === 0) {
+          return res.status(404).json({ error: "Square not found" });
+        }
+        res.status(200).json(results[0]);
+      });
+    });
   } catch (err) {
-    console.error('Error fetching square by ID:', err); // Log the error for debugging purposes
-    res.status(500).json({ error: 'Internal Server Error' }); // Handle errors and respond with a 500 status
+    console.error('Error fetching square by ID:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -147,30 +177,40 @@ app.put("/squares/:id", async (req, res) => {
     WHERE id = ?
   `;
   try {
-    const conn = await pool.getConnection(); // Get a connection from the pool
-    await conn.query(query, [
-      title,
-      plane,
-      purpose,
-      delineator,
-      notations,
-      details,
-      extraData,
-      squareClass,
-      parent,
-      depth,
-      name,
-      size,
-      color,
-      type,
-      parent_id,
-      id
-    ]); // Execute the update query
-    conn.release(); // Release the connection back to the pool
-    res.status(200).json({ message: "Square updated successfully" }); // Respond with a success message
+    pool.getConnection((err, conn) => {
+      if (err) {
+        console.error('Error getting connection:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      conn.query(query, [
+        title,
+        plane,
+        purpose,
+        delineator,
+        notations,
+        details,
+        extraData,
+        squareClass,
+        parent,
+        depth,
+        name,
+        size,
+        color,
+        type,
+        parent_id,
+        id
+      ], (error) => {
+        conn.release();
+        if (error) {
+          console.error('Error updating square:', error);
+          return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json({ message: "Square updated successfully" });
+      });
+    });
   } catch (err) {
-    console.error('Error updating square:', err); // Log the error for debugging purposes
-    res.status(500).json({ error: 'Internal Server Error' }); // Handle errors and respond with a 500 status
+    console.error('Error updating square:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -182,13 +222,23 @@ app.delete("/squares/:id", async (req, res) => {
   const { id } = req.params;
   const query = "DELETE FROM squares WHERE id = ?";
   try {
-    const conn = await pool.getConnection(); // Get a connection from the pool
-    await conn.query(query, [id]); // Execute the delete query
-    conn.release(); // Release the connection back to the pool
-    res.status(200).json({ message: "Square deleted successfully" }); // Respond with a success message
+    pool.getConnection((err, conn) => {
+      if (err) {
+        console.error('Error getting connection:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      conn.query(query, [id], (error) => {
+        conn.release();
+        if (error) {
+          console.error('Error deleting square:', error);
+          return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json({ message: "Square deleted successfully" });
+      });
+    });
   } catch (err) {
-    console.error('Error deleting square:', err); // Log the error for debugging purposes
-    res.status(500).json({ error: 'Internal Server Error' }); // Handle errors and respond with a 500 status
+    console.error('Error deleting square:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
