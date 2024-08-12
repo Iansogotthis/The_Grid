@@ -59,15 +59,13 @@ app.post("/squares", async (req, res) => {
     pool.getConnection((err, conn) => {
       if (err) {
         console.error('Error getting connection:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-        return;
+        return res.status(500).json({ error: 'Internal Server Error' });
       }
       conn.query(query, [title, plane, purpose, delineator, notations, details, extraData, squareClass, parent, depth, name, size, color, type, parent_id], (err, results) => {
         conn.release();
         if (err) {
           console.error('Error executing query:', err);
-          res.status(500).json({ error: 'Internal Server Error' });
-          return;
+          return res.status(500).json({ error: 'Internal Server Error' });
         }
         res.status(201).json({ message: 'Square created successfully', id: results.insertId });
       });
@@ -88,15 +86,13 @@ app.get("/squares", async (req, res) => {
     pool.getConnection((err, conn) => {
       if (err) {
         console.error('Error getting connection:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-        return;
+        return res.status(500).json({ error: 'Internal Server Error' });
       }
       conn.query(query, (err, results) => {
         conn.release();
         if (err) {
           console.error('Error executing query:', err);
-          res.status(500).json({ error: 'Internal Server Error' });
-          return;
+          return res.status(500).json({ error: 'Internal Server Error' });
         }
         res.status(200).json(results);
       });
@@ -118,19 +114,13 @@ app.get("/squares/:id", async (req, res) => {
     pool.getConnection((err, conn) => {
       if (err) {
         console.error('Error getting connection:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-        return;
+        return res.status(500).json({ error: 'Internal Server Error' });
       }
       conn.query(query, [id], (err, results) => {
-                conn.release();
+        conn.release();
         if (err) {
           console.error('Error executing query:', err);
-          res.status(500).json({ error: 'Internal Server Error' });
-          return;
-        }
-        if (results.length === 0) {
-          res.status(404).json({ error: 'Square not found' });
-          return;
+          return res.status(500).json({ error: 'Internal Server Error' });
         }
         res.status(200).json(results[0]);
       });
@@ -142,8 +132,8 @@ app.get("/squares/:id", async (req, res) => {
 });
 
 /**
- * Route to update a square by ID
- * This endpoint updates a square in the database based on the provided ID and data.
+ * Route to update a square
+ * This endpoint updates an existing square in the database based on the provided ID and data.
  */
 app.put("/squares/:id", async (req, res) => {
   const { id } = req.params;
@@ -164,24 +154,22 @@ app.put("/squares/:id", async (req, res) => {
     type,
     parent_id
   } = req.body;
-  const query = `UPDATE squares SET title = ?, plane = ?, purpose = ?, delineator = ?, notations = ?, details = ?, extraData = ?, class = ?, parent = ?, depth = ?, name = ?, size = ?, color = ?, type = ?, parent_id = ? WHERE id = ?`;
+  const query = `
+    UPDATE squares 
+    SET title = ?, plane = ?, purpose = ?, delineator = ?, notations = ?, details = ?, extraData = ?, class = ?, parent = ?, depth = ?, name = ?, size = ?, color = ?, type = ?, parent_id = ?
+    WHERE id = ?
+  `;
   try {
     pool.getConnection((err, conn) => {
       if (err) {
         console.error('Error getting connection:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-        return;
+        return res.status(500).json({ error: 'Internal Server Error' });
       }
       conn.query(query, [title, plane, purpose, delineator, notations, details, extraData, squareClass, parent, depth, name, size, color, type, parent_id, id], (err, results) => {
         conn.release();
         if (err) {
           console.error('Error executing query:', err);
-          res.status(500).json({ error: 'Internal Server Error' });
-          return;
-        }
-        if (results.affectedRows === 0) {
-          res.status(404).json({ error: 'Square not found' });
-          return;
+          return res.status(500).json({ error: 'Internal Server Error' });
         }
         res.status(200).json({ message: 'Square updated successfully' });
       });
@@ -193,7 +181,7 @@ app.put("/squares/:id", async (req, res) => {
 });
 
 /**
- * Route to delete a square by ID
+ * Route to delete a square
  * This endpoint deletes a square from the database based on the provided ID.
  */
 app.delete("/squares/:id", async (req, res) => {
@@ -203,19 +191,13 @@ app.delete("/squares/:id", async (req, res) => {
     pool.getConnection((err, conn) => {
       if (err) {
         console.error('Error getting connection:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-        return;
+        return res.status(500).json({ error: 'Internal Server Error' });
       }
       conn.query(query, [id], (err, results) => {
         conn.release();
         if (err) {
-          console.error('Error executing query:', err);
-          res.status(500).json({ error: 'Internal Server Error' });
-          return;
-        }
-        if (results.affectedRows === 0) {
-          res.status(404).json({ error: 'Square not found' });
-          return;
+          console.error('Error          executing query:', err);
+          return res.status(500).json({ error: 'Internal Server Error' });
         }
         res.status(200).json({ message: 'Square deleted successfully' });
       });
@@ -226,8 +208,23 @@ app.delete("/squares/:id", async (req, res) => {
   }
 });
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+/**
+ * Route to serve the form page
+ * This route serves the form_page.html file from the 'public' directory.
+ */
+app.get("/form_page.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "form_page.html"));
 });
-        
+
+/**
+ * Default Route
+ * This route serves the index.html file from the 'public' directory.
+ */
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Start the server and listen on the defined port
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});

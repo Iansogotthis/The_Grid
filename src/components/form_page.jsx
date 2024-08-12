@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-const FormPage = ({ squareData }) => {
+const FormPage = () => {
   const [formData, setFormData] = useState({
     title: '',
     plane: '',
@@ -15,25 +15,6 @@ const FormPage = ({ squareData }) => {
     type: '',
     parent_id: ''
   });
-
-  useEffect(() => {
-    if (squareData) {
-      setFormData({
-        title: squareData.title || '',
-        plane: squareData.plane || '',
-        purpose: squareData.purpose || '',
-        delineator: squareData.delineator || '',
-        notations: squareData.notations || '',
-        details: squareData.details || '',
-        extraData: squareData.extraData || '',
-        name: squareData.name || '',
-        size: squareData.size || '',
-        color: squareData.color || '',
-        type: squareData.type || '',
-        parent_id: squareData.parent_id || ''
-      });
-    }
-  }, [squareData]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
