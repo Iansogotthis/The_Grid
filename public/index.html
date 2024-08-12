@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Main View</title>
     
-
     <!-- Include D3.js library -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     
     <!-- Include custom script file -->
-    <script src="script.js" defer></script>
+    <script src="/script.js" defer></script>
     
     <style>
       /* Styling for the squares */
@@ -36,7 +35,6 @@
 <body>
     <svg id="chart"></svg>
     
-
     <!-- The Modal -->
     <div id="myModal" class="modal">
       <div class="modal-content">
@@ -235,46 +233,33 @@
         // Function to save data to the server
         async function saveData() {
           try {
-                        const response = await fetch('/squares', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                title: 'New Square',
-                plane: 'XY',
-                purpose: 'Example',
-                delineator: 'Example',
-                notations: 'Example',
-                details: 'Example',
-                extraData: 'Example',
-                class: 'root',
-                parent: 'None',
-                depth: 1,
-                name: 'Root Square',
-                size: centerSquareSize,
-                color: 'lightblue',
-                type: 'root',
-                parent_id: null
-              })
+            const squareData = {
+              name: document.getElementById('name').value,
+              size: document.getElementById('size').value,
+              color: document.getElementById('color').value,
+              type: document.getElementById('type').value,
+              parent_id: document.getElementById('parent_id').value
+            };
+            const response = await fetch('/squares', {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(squareData)
             });
-
             if (!response.ok) {
               throw new Error('Network response was not ok');
             }
-
-            const result = await response.json();
-            console.log('Data saved:', result);
+            const data = await response.json();
+            console.log('Data saved:', data);
           } catch (error) {
-            console.error('Error saving data:', error);
+            console.error("Error saving data:", error);
           }
         }
 
-        // Load data when the document is ready
-        loadData();
+        window.addEventListener("beforeunload", saveData);
+        window.addEventListener("load", loadData);
 
-        // Save data when a specific event occurs (e.g., button click)
-        document.getElementById('save-label').addEventListener('click', saveData);
+        // Adjust fruit opacity on leaf hover
+        adjustFruitOpacityOnLeafHover();
       });
     </script>
 </body>
