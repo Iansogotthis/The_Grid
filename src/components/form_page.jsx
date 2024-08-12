@@ -54,21 +54,11 @@ const FormPage = () => {
       <form id="square-form">
         {['title', 'plane', 'purpose', 'delineator', 'notations', 'name', 'size', 'color', 'type', 'parent_id'].map((field, index) => (
           <div className="form-group" key={field} style={{ marginBottom: '15px', width: '100%', maxWidth: '500px' }}>
-            <label htmlFor={field}>{`${field.charAt(0).toUpperCase() + field.slice(1)}:`}</label>
+            <label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
             <input type="text" id={field} value={formData[field]} onChange={handleChange} style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
           </div>
         ))}
-        <div className="form-group" style={{ marginBottom: '15px', width: '100%', maxWidth: '500px' }}>
-          <label htmlFor="details">Details:</label>
-          <textarea id="details" value={formData.details} onChange={handleChange} style={{ width: '100%', padding: '8px', boxSizing: 'border-box', height: '100px' }}></textarea>
-        </div>
-        <div className="form-group" style={{ marginBottom: '15px', width: '100%', maxWidth: '500px' }}>
-          <label htmlFor="extraData">Extra Data:</label>
-          <textarea id="extraData" value={formData.extraData} onChange={handleChange} style={{ width: '100%', padding: '8px', boxSizing: 'border-box', height: '100px' }}></textarea>
-        </div>
-        <div className="form-group" style={{ marginBottom: '15px', width: '100%', maxWidth: '500px' }}>
-          <button type="button" id="save" onClick={saveFormData} style={{ padding: '10px 20px', fontSize: '16px', cursor: 'pointer' }}>Save</button>
-        </div>
+        <button type="button" onClick={saveFormData} style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', cursor: 'pointer' }}>Save</button>
       </form>
     </div>
   );
