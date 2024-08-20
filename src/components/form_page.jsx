@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const FormPage = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +15,25 @@ const FormPage = () => {
     type: '',
     parent_id: ''
   });
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialData = {
+      title: urlParams.get('title') || '',
+      plane: urlParams.get('plane') || '',
+      purpose: urlParams.get('purpose') || '',
+      delineator: urlParams.get('delineator') || '',
+      notations: urlParams.get('notations') || '',
+      details: urlParams.get('details') || '',
+      extraData: urlParams.get('extraData') || '',
+      name: urlParams.get('name') || '',
+      size: urlParams.get('size') || '',
+      color: urlParams.get('color') || '',
+      type: urlParams.get('type') || '',
+      parent_id: urlParams.get('parent_id') || ''
+    };
+    setFormData(initialData);
+  }, []);
 
   const handleChange = (e) => {
     const { id, value } = e.target;

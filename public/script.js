@@ -196,10 +196,27 @@
   };
 
   btnInclude.onclick = () => {
-    currentSquare.included = !currentSquare.included;
-    initializeVisualization(squareData); // Re-render the visualization
+    if (currentSquare) {
+      const urlParams = new URLSearchParams({
+        class: currentSquare.class,
+        parent: currentSquare.parent,
+        depth: currentSquare.depth,
+        title: currentSquare.title,
+        plane: currentSquare.plane,
+        purpose: currentSquare.purpose,
+        delineator: currentSquare.delineator,
+        notations: currentSquare.notations,
+        details: currentSquare.details,
+        extraData: currentSquare.extraData,
+        name: currentSquare.name,
+        size: currentSquare.size,
+        color: currentSquare.color,
+        type: currentSquare.type,
+        parent_id: currentSquare.parent_id
+      });
+      window.location.href = `form_page.html?${urlParams.toString()}`;
+    }
   };
-
   // Load and Save Data
   async function loadData() {
     try {
